@@ -14,10 +14,10 @@
     if
         [ -b {{ item.disk }} ]
     then
-        [ -b {{ item.disk }}{{ disk.partition }} ] || parted --script "{{ item.disk }}" mklabel gpt mkpart primary 1MiB 100%
+        [ -b {{ item.disk }}{{ item.disk_partition  }} ] || parted --script "{{ item.disk }}" mklabel gpt mkpart primary 1MiB 100%
     fi
   args:
-    creates: '{{ item.disk }}{{ disk.partition }}'
+    creates: '{{ item.disk }}{{ item.disk_partition  }}'
     executable: '/bin/bash'
   with_items: '{{ disk_additional_disks }}'
   tags:
@@ -25,7 +25,7 @@
 
 - name: Create filesystem on the first partition
   filesystem:
-    dev: '{{ item.disk }}{{ disk.partition }}'
+    dev: '{{ item.disk }}{{ item.disk_partition  }}'
     force: '{{ item.force|d(omit) }}'
     fstype: '{{ item.fstype }}'
     opts: '{{ item.fsopts|d(omit) }}'
@@ -44,7 +44,7 @@
     - disk
 
 - name: Get UUID for partition
-  command: blkid -s UUID -o value "{{ item.disk }}{{ disk.partition }}"
+  command: blkid -s UUID -o value "{{ item.disk }}{{ item.disk_partition  }}"
   register: disk_blkid
   with_items: '{{ disk_additional_disks }}'
   changed_when: False
